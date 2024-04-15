@@ -1,4 +1,4 @@
-// Function to create an employee record object
+// Constructs an employee record object with the provided data
 let createEmployeeRecord = function(row){
     return {
         firstName: row[0],
@@ -10,82 +10,82 @@ let createEmployeeRecord = function(row){
     }
 }
 
-// Function to create employee records from row data
+// Takes an array of employee row data and returns an array of employee record objects
 let createEmployeeRecords = function(employeeRowData) {
     return employeeRowData.map(function(row){
         return createEmployeeRecord(row)
     })
 }
 
-// Function to add a time-in event for an employee
-let createTimeInEvent = function(dateStamp){
+// Records the time an employee clocks in
+let createTimeInEvent = function(employee, dateStamp){
     let [date, hour] = dateStamp.split(' ')
 
-    this.timeInEvents.push({
+    employee.timeInEvents.push({
         type: "TimeIn",
         hour: parseInt(hour, 10),
         date,
     })
 
-    return this
+    return employee
 }
 
-// Function to add a time-out event for an employee
-let createTimeOutEvent = function(dateStamp){
+// Records the time an employee clocks out
+let createTimeOutEvent = function(employee, dateStamp){
     let [date, hour] = dateStamp.split(' ')
 
-    this.timeOutEvents.push({
+    employee.timeOutEvents.push({
         type: "TimeOut",
         hour: parseInt(hour, 10),
         date,
     })
 
-    return this
+    return employee
 }
 
-// Function to calculate hours worked by an employee on a specific date
-let hoursWorkedOnDate = function(soughtDate){
-    let inEvent = this.timeInEvents.find(function(e){
+// Calculates the number of hours worked by an employee on a specific date
+let hoursWorkedOnDate = function(employee, soughtDate){
+    let inEvent = employee.timeInEvents.find(function(e){
         return e.date === soughtDate
     })
 
-    let outEvent = this.timeOutEvents.find(function(e){
+    let outEvent = employee.timeOutEvents.find(function(e){
         return e.date === soughtDate
     })
 
     return (outEvent.hour - inEvent.hour) / 100
 }
 
-// Function to calculate wages earned by an employee on a specific date
-let wagesEarnedOnDate = function(dateSought){
-    let rawWage = hoursWorkedOnDate.call(this, dateSought)
-        * this.payPerHour
+// Calculates the wages earned by an employee on a specific date based on their hours worked and pay rate
+let wagesEarnedOnDate = function(employee, dateSought){
+    let rawWage = hoursWorkedOnDate(employee, dateSought)
+        * employee.payPerHour
     return parseFloat(rawWage.toString())
 }
 
-// Function to calculate total wages earned by an employee
-let allWagesFor = function(){
-    let eligibleDates = this.timeInEvents.map(function(e){
+// Calculates the total wages earned by an employee across all dates
+let allWagesFor = function(employee){
+    let eligibleDates = employee.timeInEvents.map(function(e){
         return e.date
     })
 
     let payable = eligibleDates.reduce(function(memo, d){
-        return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0)
+        return memo + wagesEarnedOnDate(employee, d)
+    }, 0)
 
     return payable
 }
 
-// Function to find an employee record by first name
+// Searches for an employee record in an array of employee records by their first name
 let findEmployeeByFirstName = function(srcArray, firstName) {
   return srcArray.find(function(rec){
     return rec.firstName === firstName
   })
 }
 
-// Function to calculate total payroll for all employees
+// Calculates the total payroll for all employees in an array of employee records
 let calculatePayroll = function(arrayOfEmployeeRecords){
     return arrayOfEmployeeRecords.reduce(function(memo, rec){
-        return memo + allWagesFor.call(rec)
+        return memo + allWagesFor(rec)
     }, 0)
 }
